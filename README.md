@@ -5,7 +5,7 @@
 ```
 fontwhich
 
-Usage: fontwhich [--version] [-f|--font FONT] [-l|--lang LANG] [TEXT]
+Usage: fontwhich [--version] [-f|--font FONT] [-l|--lang LANG] [-x|--hex] [TEXT]
 
   Describes the fonts used to render text with pango
 
@@ -14,6 +14,7 @@ Available options:
   --version                Show version
   -f,--font FONT           Base font [default: Sans]
   -l,--lang LANG           Language code
+  -x,--hex                 Output UTF-8 hex codes
 ```
 
 `$ fontwhich Hello 🌍 World 世界`
@@ -41,5 +42,13 @@ Available options:
 ```
 Primary font for ja is: "Droid Sans Fallback"
 ```
+
+`$ fontwhich --hex 🍊`
+
+```
+4 bytes
+'🍊' [f0 9f 8d 8a] : Noto Color Emoji
+```
+
 
 (Note some of the results are "unexpected" because of my environment)

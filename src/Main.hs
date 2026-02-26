@@ -8,6 +8,7 @@ import qualified Data.Text.Encoding as TE
 import SimpleCmd (error', (+-+))
 import SimpleCmdArgs
 import System.Environment (getArgs, withArgs)
+import Text.Printf (printf)
 
 import qualified GI.Pango as Pango
 import qualified GI.PangoCairo.Interfaces.FontMap as PangoCairo
@@ -28,10 +29,11 @@ main' =
     run
     <$> optional (strOptionWith 'f' "font" "FONT" "Base font [default: Sans]")
     <*> optional (strOptionWith 'l' "lang" "LANG" "Language code")
+    <*> switchWith 'x' "hex" "Output UTF-8 hex codes"
     <*> many (strArg "TEXT")
 
-run :: Maybe String -> Maybe String -> [String] -> IO ()
-run mfont mlang txt = do
+run :: Maybe String -> Maybe String -> Bool -> [String] -> IO ()
+run mfont mlang hex txt = do
   -- Get a default Font Map and Context
   fontMap <- PangoCairo.fontMapGetDefault
   context <- Pango.fontMapCreateContext fontMap
@@ -68,10 +70,10 @@ run mfont mlang txt = do
 
       -- start_index, length, cached_iter
       items <- Pango.itemize context myText 0 (fromIntegral $ B.length utf8Bytes) attr Nothing
-      mapM_ (printItemInfo utf8Bytes) items
+      mapM_ (printItemInfo hex utf8Bytes) items
 
-printItemInfo :: B.ByteString -> Pango.Item -> IO ()
-printItemInfo utf8Bytes item = do
+printItemInfo :: Bool -> B.ByteString -> Pango.Item -> IO ()
+printItemInfo hex utf8Bytes item = do
   -- Get the Analysis struct from the Item
   analysis <- Pango.getItemAnalysis item
 
@@ -89,5 +91,8 @@ printItemInfo utf8Bytes item = do
       len <- Pango.getItemLength item
       let itemBytes = B.take (fromIntegral len) $ B.drop (fromIntegral offset) utf8Bytes
           itemText  = TE.decodeUtf8 itemBytes
+          hexStr = if hex
+                 then "[" ++ unwords [printf "%02x" b | b <- B.unpack itemBytes] ++ "]"
+                 else ""
       putStrLn $
-        '\'' : (T.unpack itemText) ++ "'" +-+ ":" +-+ maybe "Unknown" T.unpack family
+        '\'' : T.unpack itemText ++ "'" +-+ hexStr +-+ ":" +-+ maybe "Unknown" T.unpack family
