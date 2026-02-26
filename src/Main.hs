@@ -21,10 +21,10 @@ import qualified Data.Text as T
 
 main :: IO ()
 main = do
-  simpleCmdArgs Nothing "whichfont"
+  simpleCmdArgs Nothing "fontwhich"
     "Describes the fonts used to render text with pango" $
     run
-    <$> optional (strOptionWith 'f' "font" "FONT" "Base font (eg Sans)")
+    <$> optional (strOptionWith 'f' "font" "FONT" "Base font [default: Sans]")
     <*> many (strArg "TEXT")
 
 run :: Maybe String -> [String] -> IO ()
