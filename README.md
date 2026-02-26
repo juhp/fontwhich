@@ -52,3 +52,7 @@ Primary font for ja is: "Droid Sans Fallback"
 
 
 (Note some of the results are "unexpected" because of my environment)
+
+## Misc
+
+Code was assisted with Gemini Pro 3.1.
