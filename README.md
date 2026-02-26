@@ -21,9 +21,9 @@ Available options:
 Hello 🌍 World 世界
 23
 Hello : Noto Sans
-🌍: Noto Sans
+🌍: Noto Color Emoji
  World : Noto Sans
-世界: Noto Sans
+世界: Droid Sans Fallback
 ```
 
 `$ fontwhich -f Serif "こんにちは 😀 世界"`
@@ -31,8 +31,8 @@ Hello : Noto Sans
 ```
 こんにちは 😀 世界
 27
-こんにちは : Noto Serif
-😀: Noto Serif
+こんにちは : Noto Sans CJK JP
+😀: Noto Color Emoji
  : Noto Serif
-世界: Noto Serif
+世界: Noto Sans CJK JP
 ```
