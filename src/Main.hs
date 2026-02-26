@@ -19,9 +19,11 @@ import qualified GI.PangoCairo.Interfaces.FontMap as PangoCairo
 
 import qualified Data.Text as T
 
+import Paths_fontwhich (version)
+
 main :: IO ()
 main = do
-  simpleCmdArgs Nothing "fontwhich"
+  simpleCmdArgs (Just version) "fontwhich"
     "Describes the fonts used to render text with pango" $
     run
     <$> optional (strOptionWith 'f' "font" "FONT" "Base font [default: Sans]")
