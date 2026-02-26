@@ -24,23 +24,23 @@ Available options:
 'Hello ' : Noto Sans
 '🌍' : Noto Color Emoji
 ' World ' : Noto Sans
-'世界' : Droid Sans Fallback
+'世界' : Noto Sans CJK JP
 ```
 
 `$ fontwhich -f Serif "こんにちは 😀 世界"`
 
 ```
 27 bytes
-'こんにちは ' : Noto Sans CJK JP
+'こんにちは ' : Noto Serif CJK JP
 '😀' : Noto Color Emoji
-' ' : Noto Serif
-'世界' : Noto Sans CJK JP
+' ' : Noto Serif CJK JP
+'世界' : Noto Serif CJK JP
 ```
 
 `$ fontwhich -l ja`
 
 ```
-Primary font for ja is: "Droid Sans Fallback"
+Primary font for ja is: "Noto Sans CJK JP"
 ```
 
 `$ fontwhich --hex 🍊`
@@ -49,9 +49,6 @@ Primary font for ja is: "Droid Sans Fallback"
 4 bytes
 '🍊' [f0 9f 8d 8a] : Noto Color Emoji
 ```
-
-
-(Note some of the results are "unexpected" because of my environment)
 
 ## Misc
 
