@@ -1,30 +1,33 @@
 cabal-version:       2.2
 name:                fontwhich
 version:             0.1.0
-synopsis:            Determine fonts used for some text
+synopsis:            Determine fonts used to render text
 description:
-        Short paragraph here
+        Fontwhich is a commandline tool that used pango to determine which
+        default fonts would be used to render some text, or which font
+        would be used for a particular language script.
 license:             GPL-3.0-or-later
 license-file:        COPYING
 author:              Jens Petersen <juhpetersen@gmail.com>
 maintainer:          Jens Petersen <juhpetersen@gmail.com>
 copyright:           2026  Jens Petersen <juhpetersen@gmail.com>
-category:            Unclassified
+category:            Utility
 homepage:            https://github.com/juhp/fontwhich
 bug-reports:         https://github.com/juhp/fontwhich/issues
 build-type:          Simple
 extra-doc-files:     README.md
---                       ChangeLog.md
+                     ChangeLog.md
 -- tested-with:         GHC == 8.10.7
 --                       || == 9.0.2
 --                       || == 9.2.8
 --                       || == 9.4.8
---                       || == 9.6.5
---                       || == 9.8.2
+--                       || == 9.6.7
+--                       || == 9.8.4
+--                       || == 9.10.3
 
 source-repository head
   type:                git
-  location:            https://github.com/juhp/fontwhich-hs.git
+  location:            https://github.com/juhp/fontwhich.git
 
 executable fontwhich
   main-is:             Main.hs

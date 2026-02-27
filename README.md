@@ -1,4 +1,12 @@
-# whichfont
+# Fontwhich
+
+Fontwhich is a small CLI tool that uses pango to show
+which default fonts are used to render some text.
+
+It should work on any Linux distro with the Cairo and Pango libraries:
+it requires the fonts to be available but not a graphical session.
+
+## Usage
 
 `$ fontwhich --help`
 
@@ -50,6 +58,22 @@ Primary font for ja is: "Noto Sans CJK JP"
 '🍊' [f0 9f 8d 8a] : Noto Color Emoji
 ```
 
-## Misc
+## Building and installation
+On Fedora:
+```
+$ cabal-rpm builddep
+$ cabal install
+```
 
+There is a copr repo: <https://copr.fedorainfracloud.org/coprs/petersen/fontwhich/>
+
+## Misc
 Code was assisted with Gemini Pro 3.1.
+
+The tool is related conceptually to <https://github.com/sudipshil9862/whichfont> (C codebase).
+
+## Collaborate
+
+The code is distributed under GPLv3+.
+
+Repository: <https://github.com/juhp/fontwhich>
