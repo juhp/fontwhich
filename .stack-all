@@ -1,0 +1,3 @@
+[versions]
+# lts-21 fails to build gi-glib on F45 rawhide
+oldest = lts-22
