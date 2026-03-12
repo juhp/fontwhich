@@ -1,17 +1,18 @@
 -- SPDX-License-Identifier: BSD-3-Clause
 
-import Control.Monad.Extra (whenJust)
+import Control.Monad.Extra (forM_, when, whenJust)
 import qualified Data.ByteString as B
 import Data.Maybe (fromMaybe)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
+import qualified GI.Pango as Pango
+import qualified GI.PangoCairo.Interfaces.FontMap as PangoCairo
 import SimpleCmd (error', (+-+))
 import SimpleCmdArgs
 import System.Environment (getArgs, withArgs)
 import Text.Printf (printf)
-
-import qualified GI.Pango as Pango
-import qualified GI.PangoCairo.Interfaces.FontMap as PangoCairo
+import qualified Unicode.Char.General.Names as UN
+import qualified Unicode.Char.General.Scripts as US
 
 import Paths_fontwhich (version)
 
@@ -30,10 +31,11 @@ main' =
     <$> optional (strOptionWith 'f' "font" "FONT" "Base font [default: Sans]")
     <*> optional (strOptionWith 'l' "lang" "LANG" "Language code")
     <*> switchWith 'x' "hex" "Output UTF-8 hex codes"
+    <*> switchWith 'u' "unicode" "Output Unicode data"
     <*> many (strArg "TEXT")
 
-run :: Maybe String -> Maybe String -> Bool -> [String] -> IO ()
-run mfont mlang hex txt = do
+run :: Maybe String -> Maybe String -> Bool -> Bool -> [String] -> IO ()
+run mfont mlang hex unicode txt = do
   -- Get a default Font Map and Context
   fontMap <- PangoCairo.fontMapGetDefault
   context <- Pango.fontMapCreateContext fontMap
@@ -66,33 +68,42 @@ run mfont mlang hex txt = do
       Pango.contextSetLanguage context mplang
 
       let utf8Bytes = TE.encodeUtf8 myText
-      putStrLn $ show (B.length utf8Bytes) +-+ "bytes"
+      putStr $ show (B.length utf8Bytes) +-+ "bytes"
 
       -- start_index, length, cached_iter
       items <- Pango.itemize context myText 0 (fromIntegral $ B.length utf8Bytes) attr Nothing
-      mapM_ (printItemInfo hex utf8Bytes) items
+      putStrLn $ ";" +-+ show (length items) +-+ "item" ++ if length items > 1 then "s" else ""
+      mapM_ (printItemInfo hex unicode utf8Bytes) items
 
-printItemInfo :: Bool -> B.ByteString -> Pango.Item -> IO ()
-printItemInfo hex utf8Bytes item = do
+printItemInfo :: Bool -> Bool -> B.ByteString -> Pango.Item -> IO ()
+printItemInfo hex unicode utf8Bytes item = do
   -- Get the Analysis struct from the Item
   analysis <- Pango.getItemAnalysis item
 
   -- Extract the Font used for this specific item
   maybeFont <- Pango.getAnalysisFont analysis
 
-  case maybeFont of
-    Nothing -> putStrLn "No font assigned to this segment."
-    Just font -> do
-      desc <- Pango.fontDescribe font
-      family <- Pango.fontDescriptionGetFamily desc
+  mfamily <-
+    case maybeFont of
+      Nothing -> do
+        putStrLn "No font assigned to this segment."
+        return Nothing
+      Just font ->
+        Pango.fontDescribe font >>= Pango.fontDescriptionGetFamily
 
-      -- Offsets in Pango are byte offsets
-      offset <- Pango.getItemOffset item
-      len <- Pango.getItemLength item
-      let itemBytes = B.take (fromIntegral len) $ B.drop (fromIntegral offset) utf8Bytes
-          itemText  = TE.decodeUtf8 itemBytes
-          hexStr = if hex
-                 then "[" ++ unwords [printf "%02x" b | b <- B.unpack itemBytes] ++ "]"
-                 else ""
-      putStrLn $
-        '\'' : T.unpack itemText ++ "'" +-+ hexStr +-+ ":" +-+ maybe "Unknown" T.unpack family
+  -- Offsets in Pango are byte offsets
+  offset <- Pango.getItemOffset item
+  len <- Pango.getItemLength item
+  let itemBytes = B.take (fromIntegral len) $ B.drop (fromIntegral offset) utf8Bytes
+      itemStr  = T.unpack $ TE.decodeUtf8 itemBytes
+      hexStr = if hex
+             then "[" ++ unwords [printf "%02x" b | b <- B.unpack itemBytes] ++ "]"
+             else ""
+  putStrLn $
+    '\'' : itemStr ++ "'" +-+ hexStr +-+ ":" +-+ maybe "Unknown" T.unpack mfamily
+  when unicode $
+    forM_ itemStr $ \char -> do
+    putChar char
+    let mname = UN.name char
+        script = US.script char
+    putStrLn $ ":" +-+ fromMaybe "unknown codepoint" mname +-+ '[' : show script +-+ '(' : US.scriptShortName script ++")]"
