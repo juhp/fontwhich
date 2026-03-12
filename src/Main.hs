@@ -75,7 +75,10 @@ run mfont mlang hex unicode txt = do
       -- start_index, length, cached_iter
       items <- Pango.itemize context myText 0 (fromIntegral $ B.length utf8Bytes) attr Nothing
       when (hex || unicode) $
-        putStrLn $ ' ' : show (length items) +-+ "pango item" ++ if length items == 1 then "" else "s"
+        putStrLn $
+        if length items > 1
+        then ' ' : show (length items) +-+ "pango items"
+        else ""
       mapM (itemString utf8Bytes) items >>=
         mapM_ (printItemInfo hex unicode)
   where
