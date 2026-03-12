@@ -1,0 +1,5 @@
+resolver: nightly-2026-03-12
+extra-deps:
+- gi-pangocairo-1.0.31
+- unicode-data-names-0.6.0
+- unicode-data-scripts-0.6.0
