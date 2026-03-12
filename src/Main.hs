@@ -9,7 +9,7 @@ import qualified Data.Text.Encoding as TE
 import qualified GI.Pango as Pango
 import qualified GI.PangoCairo.Interfaces.FontMap as PangoCairo
 import SimpleCmd (error', (+-+))
-import SimpleCmdArgs
+import SimpleCmdArgs hiding (str)
 import System.Environment (getArgs, withArgs)
 import Text.Printf (printf)
 import qualified Unicode.Char.General.Names as UN
@@ -76,10 +76,19 @@ run mfont mlang hex unicode txt = do
       items <- Pango.itemize context myText 0 (fromIntegral $ B.length utf8Bytes) attr Nothing
       when (hex || unicode) $
         putStrLn $ ' ' : show (length items) +-+ "pango item" ++ if length items == 1 then "" else "s"
-      mapM_ (printItemInfo hex unicode utf8Bytes) items
+      mapM (itemString utf8Bytes) items >>=
+        mapM_ (printItemInfo hex unicode)
+  where
+    itemString :: B.ByteString -> Pango.Item -> IO (String, Pango.Item)
+    itemString utf8Bytes item = do
+      -- Offsets in Pango are bytes
+      offset <- Pango.getItemOffset item
+      len <- Pango.getItemLength item
+      let itemBytes = B.take (fromIntegral len) $ B.drop (fromIntegral offset) utf8Bytes
+      return (T.unpack $ TE.decodeUtf8 itemBytes, item)
 
-printItemInfo :: Bool -> Bool -> B.ByteString -> Pango.Item -> IO ()
-printItemInfo hex unicode utf8Bytes item = do
+printItemInfo :: Bool -> Bool -> (String, Pango.Item) -> IO ()
+printItemInfo hex unicode (str,item) = do
   -- Get the Analysis struct from the Item
   analysis <- Pango.getItemAnalysis item
 
@@ -89,25 +98,25 @@ printItemInfo hex unicode utf8Bytes item = do
   mfamily <-
     case maybeFont of
       Nothing -> do
-        putStrLn "No font assigned to this segment."
+        putStrLn "No font assigned"
         return Nothing
       Just font ->
         Pango.fontDescribe font >>= Pango.fontDescriptionGetFamily
 
-  -- Offsets in Pango are byte offsets
-  offset <- Pango.getItemOffset item
-  len <- Pango.getItemLength item
-  let itemBytes = B.take (fromIntegral len) $ B.drop (fromIntegral offset) utf8Bytes
-      itemStr  = T.unpack $ TE.decodeUtf8 itemBytes
-      hexStr = if hex
-             then "[" ++ unwords [printf "%02x" b | b <- B.unpack itemBytes] ++ "]"
+  let hexStr = if hex
+             then unwords $ map hexify str
              else ""
   putStrLn $
-    '\'' : itemStr ++ "'" +-+ hexStr +-+ ":" +-+ maybe "Unknown" T.unpack mfamily
+    '\'' : str ++ "'" +-+ hexStr +-+ ":" +-+ maybe "Unknown" T.unpack mfamily
   when unicode $
-    forM_ itemStr $ \char -> do
+    forM_ str $ \char -> do
     putChar char
     let mname = UN.name char
         script = US.script char
         codepoint = printf "U+%04X" (ord char)
     putStrLn $ " <" ++ codepoint ++ ">:" +-+ fromMaybe "unknown codepoint" mname +-+ '[' : show script ++ "]" -- +-+ '(' : US.scriptShortName script ++ ")"
+  where
+    hexify :: Char -> String
+    hexify char =
+      let bytes = TE.encodeUtf8 $ T.singleton char
+      in '[' : unwords [printf "%02x" b | b <- B.unpack bytes] ++ "]"
