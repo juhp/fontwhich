@@ -8,12 +8,19 @@ it requires the fonts to be available but not a graphical session.
 
 ## Usage
 
+`$ fontwhich --version`
+
+```
+0.1.1
+```
+
 `$ fontwhich --help`
 
 ```
 fontwhich
 
-Usage: fontwhich [--version] [-f|--font FONT] [-l|--lang LANG] [-x|--hex] [TEXT]
+Usage: fontwhich [--version] [-f|--font FONT] [-l|--lang LANG] [-x|--hex] 
+                 [-u|--unicode] [TEXT]
 
   Describes the fonts used to render text with pango
 
@@ -23,12 +30,13 @@ Available options:
   -f,--font FONT           Base font [default: Sans]
   -l,--lang LANG           Language code
   -x,--hex                 Output UTF-8 hex codes
+  -u,--unicode             Output Unicode data
 ```
 
 `$ fontwhich Hello 🌍 World 世界`
 
 ```
-23 bytes
+23 bytes; 4 items
 'Hello ' : Noto Sans
 '🌍' : Noto Color Emoji
 ' World ' : Noto Sans
@@ -38,8 +46,8 @@ Available options:
 `$ fontwhich -f Serif "こんにちは 😀 世界"`
 
 ```
-27 bytes
 'こんにちは ' : Noto Serif CJK JP
+27 bytes; 4 items
 '😀' : Noto Color Emoji
 ' ' : Noto Serif CJK JP
 '世界' : Noto Serif CJK JP
@@ -54,7 +62,7 @@ Primary font for ja is: "Noto Sans CJK JP"
 `$ fontwhich --hex 🍊`
 
 ```
-4 bytes
+4 bytes; 1 item
 '🍊' [f0 9f 8d 8a] : Noto Color Emoji
 ```
 

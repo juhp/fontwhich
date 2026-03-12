@@ -30,7 +30,7 @@ main' =
     run
     <$> optional (strOptionWith 'f' "font" "FONT" "Base font [default: Sans]")
     <*> optional (strOptionWith 'l' "lang" "LANG" "Language code")
-    <*> switchWith 'x' "hex" "Output UTF-8 hex codes"
+    <*> switchWith 'b' "utf8" "Output UTF-8 hex codes"
     <*> switchWith 'u' "unicode" "Output Unicode data"
     <*> many (strArg "TEXT")
 
