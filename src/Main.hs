@@ -69,11 +69,13 @@ run mfont mlang hex unicode txt = do
       Pango.contextSetLanguage context mplang
 
       let utf8Bytes = TE.encodeUtf8 myText
-      putStr $ show (B.length utf8Bytes) +-+ "bytes"
+      when (hex || unicode) $
+        putStr $ show (B.length utf8Bytes) +-+ "bytes;"
 
       -- start_index, length, cached_iter
       items <- Pango.itemize context myText 0 (fromIntegral $ B.length utf8Bytes) attr Nothing
-      putStrLn $ ";" +-+ show (length items) +-+ "item" ++ if length items > 1 then "s" else ""
+      when (hex || unicode) $
+        putStrLn $ ' ' : show (length items) +-+ "pango item" ++ if length items == 1 then "" else "s"
       mapM_ (printItemInfo hex unicode utf8Bytes) items
 
 printItemInfo :: Bool -> Bool -> B.ByteString -> Pango.Item -> IO ()
