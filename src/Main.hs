@@ -2,6 +2,7 @@
 
 import Control.Monad.Extra (forM_, when, whenJust)
 import qualified Data.ByteString as B
+import Data.Char (ord)
 import Data.Maybe (fromMaybe)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
@@ -106,4 +107,5 @@ printItemInfo hex unicode utf8Bytes item = do
     putChar char
     let mname = UN.name char
         script = US.script char
-    putStrLn $ ":" +-+ fromMaybe "unknown codepoint" mname +-+ '[' : show script +-+ '(' : US.scriptShortName script ++")]"
+        codepoint = printf "U+%04X" (ord char)
+    putStrLn $ " <" ++ codepoint ++ ">:" +-+ fromMaybe "unknown codepoint" mname +-+ '[' : show script ++ "]" -- +-+ '(' : US.scriptShortName script ++ ")"
