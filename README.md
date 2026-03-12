@@ -11,7 +11,7 @@ it requires the fonts to be available but not a graphical session.
 `$ fontwhich --version`
 
 ```
-0.1.1
+0.2
 ```
 
 `$ fontwhich --help`
@@ -19,7 +19,7 @@ it requires the fonts to be available but not a graphical session.
 ```
 fontwhich
 
-Usage: fontwhich [--version] [-f|--font FONT] [-l|--lang LANG] [-x|--hex] 
+Usage: fontwhich [--version] [-f|--font FONT] [-l|--lang LANG] [-b|--utf8] 
                  [-u|--unicode] [TEXT]
 
   Describes the fonts used to render text with pango
@@ -29,14 +29,13 @@ Available options:
   --version                Show version
   -f,--font FONT           Base font [default: Sans]
   -l,--lang LANG           Language code
-  -x,--hex                 Output UTF-8 hex codes
+  -b,--utf8                Output UTF-8 hex codes
   -u,--unicode             Output Unicode data
 ```
 
 `$ fontwhich Hello 🌍 World 世界`
 
 ```
-23 bytes; 4 items
 'Hello ' : Noto Sans
 '🌍' : Noto Color Emoji
 ' World ' : Noto Sans
@@ -47,7 +46,6 @@ Available options:
 
 ```
 'こんにちは ' : Noto Serif CJK JP
-27 bytes; 4 items
 '😀' : Noto Color Emoji
 ' ' : Noto Serif CJK JP
 '世界' : Noto Serif CJK JP
@@ -59,12 +57,35 @@ Available options:
 Primary font for ja is: "Noto Sans CJK JP"
 ```
 
-`$ fontwhich --hex 🍊`
+`$ fontwhich --utf8 🌳`
 
 ```
-4 bytes; 1 item
-'🍊' [f0 9f 8d 8a] : Noto Color Emoji
+4 bytes;
+'🌳' [f0 9f 8c b3] : Noto Color Emoji
 ```
+
+`$ fontwhich --unicode αβ१२`
+
+```
+10 bytes; 2 pango items
+'αβ' : Noto Sans
+α <U+03B1>: GREEK SMALL LETTER ALPHA [Greek]
+β <U+03B2>: GREEK SMALL LETTER BETA [Greek]
+'१२' : Noto Sans Devanagari
+१ <U+0967>: DEVANAGARI DIGIT ONE [Devanagari]
+२ <U+0968>: DEVANAGARI DIGIT TWO [Devanagari]
+```
+
+One can use both options together:
+
+`$ fontwhich --utf8 🍊 --unicode`
+
+```
+4 bytes;
+'🍊' [f0 9f 8d 8a] : Noto Color Emoji
+🍊 <U+1F34A>: TANGERINE [Common]
+```
+
 
 ## Building and installation
 On Fedora:
@@ -76,7 +97,7 @@ $ cabal install
 There is a copr repo: <https://copr.fedorainfracloud.org/coprs/petersen/fontwhich/>
 
 ## Misc
-Code was assisted with Gemini Pro 3.1.
+Code assisted with Gemini 3.1.
 
 The tool is related conceptually to <https://github.com/sudipshil9862/whichfont> (C codebase).
 
