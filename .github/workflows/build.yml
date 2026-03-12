@@ -1,9 +1,9 @@
 name: build
 on:
   push:
-    branches: [ haskell ]
+    branches: [ main ]
   pull_request:
-    branches: [ haskell ]
+    branches: [ main ]
 jobs:
   build:
     runs-on: ubuntu-latest
