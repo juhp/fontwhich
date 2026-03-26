@@ -41,7 +41,8 @@ run mfont mlang hex unicode txt = do
   fontMap <- PangoCairo.fontMapGetDefault
   context <- Pango.fontMapCreateContext fontMap
   attr <- Pango.attrListNew
-  baseFont <- Pango.fontDescriptionFromString $ T.pack $ fromMaybe "Sans" mfont
+  let baseName = fromMaybe "Sans" mfont
+  baseFont <- Pango.fontDescriptionFromString $ T.pack baseName
   mplang <- Pango.languageFromString $ T.pack <$> mlang
 
   if null txt then do
@@ -60,7 +61,7 @@ run mfont mlang hex unicode txt = do
                 desc' <- Pango.fontDescribe font
                 mfamily <- Pango.fontDescriptionGetFamily desc'
                 whenJust mfamily $ \family ->
-                  putStrLn $ "Primary font" +-+ maybe "" ("for" +-+) mlang +-+ "is:" +-+ show family
+                  putStrLn $ "Primary" +-+ baseName +-+ "font" +-+ maybe "" ("for" +-+) mlang +-+ "is:" +-+ show family
                 return True -- stop after first font
     else do
       let myText = T.pack $ unwords txt
