@@ -3,7 +3,7 @@
 import Control.Monad.Extra (filterM, forM_, when, whenJust)
 import qualified Data.ByteString as B
 import Data.Char (ord)
-import Data.Maybe (fromMaybe)
+import Data.Maybe (fromMaybe, isNothing)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
 import qualified GI.Pango as Pango
@@ -121,7 +121,7 @@ printItemInfo hex unicode (str,item) = do
         else ""
   putStrLn $
     quoteStr str +-+ hexStr +-+ ":" +-+ maybe "Unknown" T.unpack mfamily
-  when unicode $
+  when (unicode || isNothing mfamily) $
     forM_ str $ \char -> do
     putChar char
     let mname = UN.name char
