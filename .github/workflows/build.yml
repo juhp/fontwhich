@@ -25,6 +25,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-${{ matrix.ghc }}-
             ${{ runner.os }}-
+      - run: sudo apt-get update
       - run: sudo apt-get -y install libcairo2-dev libpango1.0-dev libgirepository1.0-dev
       - run: cabal update
       - run: cabal build

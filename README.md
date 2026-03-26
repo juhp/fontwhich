@@ -11,7 +11,7 @@ it requires the fonts to be available but not a graphical session.
 `$ fontwhich --version`
 
 ```
-0.2
+0.2.1
 ```
 
 `$ fontwhich --help`
@@ -19,7 +19,7 @@ it requires the fonts to be available but not a graphical session.
 ```
 fontwhich
 
-Usage: fontwhich [--version] [-f|--font FONT] [-l|--lang LANG] [-b|--utf8] 
+Usage: fontwhich [--version] [-f|--font FONT] [-l|--lang LANG] [-b|--utf8]
                  [-u|--unicode] [TEXT]
 
   Describes the fonts used to render text with pango
@@ -54,7 +54,7 @@ Available options:
 `$ fontwhich -l ja`
 
 ```
-Primary font for ja is: "Noto Sans CJK JP"
+Primary Sans font for ja is: "Noto Sans CJK JP"
 ```
 
 `$ fontwhich --utf8 🌳`
@@ -88,10 +88,20 @@ One can use both options together:
 
 
 ## Building and installation
-On Fedora:
+On Fedora, install system deps with `cabal-rpm builddep`.
+
+C library dependencies:
+
+- Fedora: cairo-devel pango-devel gobject-introspection-devel
+- Ubuntu: libcairo2-dev libpango1.0-dev libgirepository1.0-dev
+
+Then:
 ```
-$ cabal-rpm builddep
 $ cabal install
+```
+or
+```
+$ stack install
 ```
 
 There is a copr repo: <https://copr.fedorainfracloud.org/coprs/petersen/fontwhich/>
@@ -100,6 +110,8 @@ There is a copr repo: <https://copr.fedorainfracloud.org/coprs/petersen/fontwhic
 Code assisted with Gemini 3.1.
 
 The tool is related conceptually to <https://github.com/sudipshil9862/whichfont> (C codebase).
+
+"fontwhich" as in "sandwhich" but with fonts.
 
 ## Collaborate
 

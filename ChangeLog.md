@@ -1,5 +1,9 @@
 # fontwhich releases
 
+## 0.2.1 (2026-03-26)
+- check and warn about characters without font coverage
+- output base font name when not text given
+
 ## 0.2 (2026-03-12)
 - add --unicode for unicode data output (uses `unicode-data`)
 - rename --hex to --utf8 (for hex bytes)

@@ -1,4 +1,4 @@
-resolver: lts-24.33
+resolver: lts-24.34
 extra-deps:
 - gi-pangocairo-1.0.31
 - unicode-data-names-0.4.0

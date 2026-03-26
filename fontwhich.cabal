@@ -1,6 +1,6 @@
 cabal-version:       2.2
 name:                fontwhich
-version:             0.2
+version:             0.2.1
 synopsis:            Determine fonts used to render text
 description:
         Fontwhich is a commandline tool that used pango to determine which
@@ -17,7 +17,9 @@ bug-reports:         https://github.com/juhp/fontwhich/issues
 build-type:          Simple
 extra-doc-files:     README.md
                      ChangeLog.md
-tested-with:         GHC == 9.6.7
+tested-with:         GHC == 9.2.8
+                      || == 9.4.8
+                      || == 9.6.7
                       || == 9.8.4
                       || == 9.10.3
                       || == 9.12.3
