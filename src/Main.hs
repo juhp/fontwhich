@@ -110,9 +110,10 @@ printItemInfo hex unicode (str,item) = do
       Just font ->
         Pango.fontDescribe font >>= Pango.fontDescriptionGetFamily
 
-  let hexStr = if hex
-             then unwords $ map hexify str
-             else ""
+  let hexStr =
+        if hex
+        then unwords $ map hexify str
+        else ""
   putStrLn $
     quoteStr str +-+ hexStr +-+ ":" +-+ maybe "Unknown" T.unpack mfamily
   when unicode $
