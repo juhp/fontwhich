@@ -1,6 +1,6 @@
 -- SPDX-License-Identifier: BSD-3-Clause
 
-import Control.Monad.Extra (forM_, when, whenJust)
+import Control.Monad.Extra (filterM, forM_, when, whenJust)
 import qualified Data.ByteString as B
 import Data.Char (ord)
 import Data.Maybe (fromMaybe)
@@ -107,8 +107,13 @@ printItemInfo hex unicode (str,item) = do
       Nothing -> do
         putStrLn "No font assigned"
         return Nothing
-      Just font ->
-        Pango.fontDescribe font >>= Pango.fontDescriptionGetFamily
+      Just font -> do
+        notcovered <- filterM (fmap not . Pango.fontHasChar font) str
+        if null notcovered
+          then Pango.fontDescribe font >>= Pango.fontDescriptionGetFamily
+          else do
+          putStrLn $ "no font coverage for" +-+ quoteStr notcovered ++ "!"
+          return Nothing
 
   let hexStr =
         if hex
