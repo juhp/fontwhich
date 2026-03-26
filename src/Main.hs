@@ -105,7 +105,7 @@ printItemInfo hex unicode (str,item) = do
   mfamily <-
     case maybeFont of
       Nothing -> do
-        putStrLn "No font assigned"
+        putStrLn "No font installed?"
         return Nothing
       Just font -> do
         notcovered <- filterM (fmap not . Pango.fontHasChar font) str
