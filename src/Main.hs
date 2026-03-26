@@ -1,6 +1,6 @@
 -- SPDX-License-Identifier: BSD-3-Clause
 
-import Control.Monad.Extra (filterM, forM_, when, whenJust)
+import Control.Monad.Extra (filterM, forM_, unless, when, whenJust)
 import qualified Data.ByteString as B
 import Data.Char (ord)
 import Data.Maybe (fromMaybe, isNothing)
@@ -105,22 +105,27 @@ printItemInfo hex unicode (str,item) = do
   mfamily <-
     case maybeFont of
       Nothing -> do
-        putStrLn "No font installed?"
+        putStrLn "No fonts installed?"
         return Nothing
       Just font -> do
         notcovered <- filterM (fmap not . Pango.fontHasChar font) str
-        if null notcovered
-          then Pango.fontDescribe font >>= Pango.fontDescriptionGetFamily
-          else do
+        unless (null notcovered) $
           putStrLn $ "no font coverage for" +-+ quoteStr notcovered ++ "!"
-          return Nothing
+        if notcovered == str
+          then return Nothing
+          else Pango.fontDescribe font >>= Pango.fontDescriptionGetFamily
 
   let hexStr =
         if hex
         then unwords $ map hexify str
         else ""
-  putStrLn $
-    quoteStr str +-+ hexStr +-+ ":" +-+ maybe "Unknown" T.unpack mfamily
+  case mfamily of
+    Just family ->
+      putStrLn $ quoteStr str +-+ hexStr +-+ ":" +-+ T.unpack family
+    Nothing ->
+      unless (null hexStr) $
+      putStrLn $ quoteStr str +-+ hexStr
+
   when (unicode || isNothing mfamily) $
     forM_ str $ \char -> do
     putChar char
