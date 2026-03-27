@@ -19,8 +19,8 @@ it requires the fonts to be available but not a graphical session.
 ```
 fontwhich
 
-Usage: fontwhich [--version] [-f|--font FONT] [-b|--utf8] [-u|--unicode] 
-                 [-s|--sample-text] 
+Usage: fontwhich [--version] [-f|--font FONT] [-b|--utf8] [-u|--unicode]
+                 [-s|--sample-text]
                  (--list-langs | (-l|--lang LANG) | --all-langs | TEXT)
 
   Describes the fonts used to render text with pango
@@ -96,8 +96,8 @@ On Fedora, install system deps with `cabal-rpm builddep`.
 
 C library dependencies:
 
-- Fedora: cairo-devel pango-devel gobject-introspection-devel
-- Ubuntu: libcairo2-dev libpango1.0-dev libgirepository1.0-dev
+- Fedora: cairo-gobject-devel gobject-introspection-devel pango-devel
+- Ubuntu: libcairo2-dev libgirepository1.0-dev libpango1.0-dev
 
 Then:
 ```
