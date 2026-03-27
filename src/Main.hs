@@ -46,10 +46,10 @@ run mfont mlang hex unicode txt = do
 
   if null txt then do
       case mplang of
-        Nothing -> error' "no language determined"
+        Nothing -> error' "no language determined or text given"
         Just plang -> do
-          maybeFontset <- Pango.fontMapLoadFontset fontMap context baseFont plang
-          case maybeFontset of
+          mfontset <- Pango.fontMapLoadFontset fontMap context baseFont plang
+          case mfontset of
             Nothing -> error' "no fontset found"
             Just fs -> do
               -- Get the first (primary) font in the fontset
