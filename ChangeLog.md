@@ -7,6 +7,7 @@
 - check normalized lang is in fontconfig orth list
 - new pango --sample-text option with --language
 - add --list-langs option to list all fc orths
+- add --all-langs which iterates over all orth langs
 
 ## 0.2.1 (2026-03-26)
 - check and warn about characters without font coverage

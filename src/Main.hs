@@ -1,6 +1,6 @@
 -- SPDX-License-Identifier: BSD-3-Clause
 
-import Control.Monad.Extra (filterM, forM_, unless, void, when, whenJust)
+import Control.Monad.Extra (filterM, forM_, unless, when, whenJust)
 import qualified Data.ByteString as B
 import Data.Char (isAsciiLower, ord)
 import Data.List (singleton)
@@ -10,25 +10,24 @@ import qualified Data.Text.Encoding as TE
 import qualified GI.Pango as Pango
 import qualified GI.PangoCairo.Interfaces.FontMap as PangoCairo
 import SimpleCmd (error', (+-+))
-import SimpleCmdArgs (flagWith', flagLongWith', optional, simpleCmdArgs, some,
-                      strArg, strOptionWith, switchWith, (<|>))
+import SimpleCmdArgs (flagLongWith', optional, simpleCmdArgs, some, strArg,
+                      strOptionWith, switchWith, (<|>))
 import Text.Printf (printf)
 import qualified Unicode.Char.General.Names as UN
 import qualified Unicode.Char.General.Scripts as US
 
 import Paths_fontwhich (version)
-import System.Exit (exitSuccess)
 
-data LangText = SampleText -- | LangName
-
-data Mode =
-  ListLangs | LangReq !String !(Maybe LangText) | InputText ![String]
+data Mode = ListLangs
+          | Lang !String !Bool
+          | AllLangs !Bool
+          | InputText ![String]
 
 main :: IO ()
 main =
   simpleCmdArgs (Just version) "fontwhich"
   "Describes the fonts used to render text with pango" $
-    run
+    runMain
     <$> optional (strOptionWith 'f' "font" "FONT" "Base font [default: Sans]")
     <*> switchWith 'b' "utf8" "Output UTF-8 hex codes"
     <*> switchWith 'u' "unicode" "Output Unicode data"
@@ -36,88 +35,91 @@ main =
   where
     modeOpt =
       flagLongWith' ListLangs "list-langs" "List language orthography" <|>
-      (LangReq
+      (Lang
        <$> strOptionWith 'l' "lang" "LANG" "Language code"
-       <*> optional (flagWith' SampleText 's' "sample-text" "Use Pango sample text for language"
-                     -- <|> flagWith' LangName 'n' "lang-name" "Use language name as text"
-                    )
-      )
+       <*> switchWith 's' "sample-text" "Use Pango sample text for language")
       <|>
+      (flagLongWith' AllLangs "all-langs" "Output all orth languages" <*> switchWith 's' "sample-text" "Use Pango sample text for language") <|>
       InputText <$> some (strArg "TEXT")
 
-run :: Maybe String -> Bool -> Bool -> Mode -> IO ()
-run mfont hex unicode txtreq = do
+runMain :: Maybe String -> Bool -> Bool -> Mode -> IO ()
+runMain mfont hex unicode mode = do
   -- Get a default Font Map and Context
   fontMap <- PangoCairo.fontMapGetDefault
   context <- Pango.fontMapCreateContext fontMap
   let baseName = fromMaybe "Sans" mfont
   baseFont <- Pango.fontDescriptionFromString $ T.pack baseName
-  (txt,mlangcode) <-
-    case txtreq of
-      ListLangs -> do
-        putStrLn $ unwords orths
-        void exitSuccess
-        return ([],Nothing)
-      InputText args -> return (args,Nothing)
-      LangReq lang mltxt -> do
-        (plang,code) <- determineLangCode lang
-        t <-
-          case mltxt of
-            Nothing -> return []
-            Just SampleText ->
-              words . T.unpack <$> Pango.languageGetSampleString (Just plang)
-            -- FIXME with iso-codes json + gettext perhaps
-            -- Just LangName -> return ["To be implemented!"]
-        return (t, Just (plang,code))
-
-  if null txt then do
-      case mlangcode of
-        Nothing -> error' "no language or text string specified"
-        Just (plang,langcode) -> do
-          mfontset <- Pango.fontMapLoadFontset fontMap context baseFont plang
-          case mfontset of
-            Nothing -> error' "no fontset found"
-            Just fs -> do
-              -- Get the first (primary) font in the fontset
-              -- 'fontsetForeach' is the standard way to inspect them
-              -- For a quick check, we can just look at the primary result
-              -- In many cases, we want to see the first font that Pango resolves
-              Pango.fontsetForeach fs $ \_ font -> do
-                desc' <- Pango.fontDescribe font
-                mfamily <- Pango.fontDescriptionGetFamily desc'
-                whenJust mfamily $ \family -> do
-                  mlangs <- Pango.fontGetLanguages font
-                  let missing =
-                        case mlangs of
-                          Nothing -> ""
-                          Just langs ->
-                            if plang `elem` langs
-                            then ""
-                            else parenStr "missing coverage"
-                  -- was:
-                  putStrLn $ "Primary" +-+ baseName +-+ "font for" +-+ quoteStr langcode +-+ "is:" +-+ show family +-+ missing
-                return True -- stop after first font
-    else do
-      let myText = T.pack $ unwords txt
-
-      Pango.contextSetFontDescription context $ Just baseFont
-      Pango.contextSetLanguage context (fst <$> mlangcode)
-
-      let utf8Bytes = TE.encodeUtf8 myText
-      when (hex || unicode) $
-        putStr $ show (B.length utf8Bytes) +-+ "bytes;"
-
-      attr <- Pango.attrListNew
-      -- start_index, length, cached_iter
-      items <- Pango.itemize context myText 0 (fromIntegral $ B.length utf8Bytes) attr Nothing
-      when (hex || unicode) $
-        putStrLn $
-        if length items > 1
-        then ' ' : show (length items) +-+ "pango items"
-        else ""
-      mapM (itemString utf8Bytes) items >>=
-        mapM_ (printItemInfo hex unicode)
+  runMode fontMap context baseName baseFont mode
   where
+    runMode fontMap context baseName baseFont mode' =
+      case mode' of
+        ListLangs -> do
+          putStrLn $ unwords orths
+        InputText args -> run args Nothing
+        Lang lang sample -> do
+          (plang,code) <- determineLangCode lang
+          t <-
+            if sample
+            -- for few langs we get itemization (eg ja)
+            then words . T.unpack <$> Pango.languageGetSampleString (Just plang)
+            else return []
+              -- FIXME with iso-codes json + gettext perhaps
+              -- Just LangName -> return ["To be implemented!"]
+          run t $ Just (plang,code)
+        AllLangs sample ->
+          forM_ orths $ \orth -> do
+          when sample $ putStr $ quoteStr orth ++ ": "
+          runMode fontMap context baseName baseFont $ Lang orth sample
+      where
+        run txt mlangcode= do
+          if null txt then do
+              case mlangcode of
+                Nothing -> error' "no language or text string specified"
+                Just (plang,langcode) -> do
+                  mfontset <- Pango.fontMapLoadFontset fontMap context baseFont plang
+                  case mfontset of
+                    Nothing -> error' "no fontset found"
+                    Just fs -> do
+                      -- Get the first (primary) font in the fontset
+                      -- 'fontsetForeach' is the standard way to inspect them
+                      -- For a quick check, we can just look at the primary result
+                      -- In many cases, we want to see the first font that Pango resolves
+                      Pango.fontsetForeach fs $ \_ font -> do
+                        desc' <- Pango.fontDescribe font
+                        mfamily <- Pango.fontDescriptionGetFamily desc'
+                        whenJust mfamily $ \family -> do
+                          mlangs <- Pango.fontGetLanguages font
+                          let missing =
+                                case mlangs of
+                                  Nothing -> ""
+                                  Just langs ->
+                                    if plang `elem` langs
+                                    then ""
+                                    else parenStr "missing coverage"
+                          putStrLn $ "Primary" +-+ baseName +-+ "font for" +-+ quoteStr langcode ++ ":" +-+ show family +-+ missing
+                        return True -- stop after first font
+            else do
+              let myText = T.pack $ unwords txt
+
+              Pango.contextSetFontDescription context $ Just baseFont
+              Pango.contextSetLanguage context (fst <$> mlangcode)
+
+              let utf8Bytes = TE.encodeUtf8 myText
+              when (hex || unicode) $
+                putStr $ show (B.length utf8Bytes) +-+ "bytes;"
+
+              attr <- Pango.attrListNew
+              -- start_index, length, cached_iter
+              items <- Pango.itemize context myText 0 (fromIntegral $ B.length utf8Bytes) attr Nothing
+              when (hex || unicode) $
+                putStrLn $
+                if length items > 1
+                then ' ' : show (length items) +-+ "pango items"
+                else ""
+              mapM (itemString utf8Bytes) items >>=
+                -- FIXME gather by font (eg for Japanese scripts)
+                mapM_ (printItemInfo hex unicode)
+
     itemString :: B.ByteString -> Pango.Item -> IO (String, Pango.Item)
     itemString utf8Bytes item = do
       -- Offsets in Pango are bytes
@@ -189,7 +191,6 @@ orths =
 determineLangCode :: String -> IO (Pango.Language, String)
 determineLangCode lang = do
   mplang <- Pango.languageFromString $ Just $ T.pack lang
-  -- FIXME remove region if no "xx-yy" orth (xx_YY -> xx)
   (plang,code) <-
     case mplang of
       Nothing -> error' "impossible happened: no Pango lang from string"
