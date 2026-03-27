@@ -47,19 +47,18 @@ Available options:
 '世界' : Noto Sans CJK JP
 ```
 
-`$ fontwhich -f Serif "こんにちは 😀 世界"`
+`$ fontwhich -f Serif "世界こんにちは😀"`
 
 ```
-'こんにちは ' : Noto Serif CJK JP
-'😀' : Noto Color Emoji
-' ' : Noto Serif CJK JP
 '世界' : Noto Serif CJK JP
+'こんにちは' : Noto Serif CJK JP
+'😀' : Noto Color Emoji
 ```
 
 `$ fontwhich -l ja`
 
 ```
-Primary Sans font for ja is: "Noto Sans CJK JP"
+Primary Sans font for 'ja': "Noto Sans CJK JP"
 ```
 
 `$ fontwhich --utf8 🌳`
@@ -83,12 +82,12 @@ Primary Sans font for ja is: "Noto Sans CJK JP"
 
 One can use both options together:
 
-`$ fontwhich --utf8 🍊 --unicode`
+`$ fontwhich --utf8 🌸 --unicode`
 
 ```
 4 bytes;
-'🍊' [f0 9f 8d 8a] : Noto Color Emoji
-🍊 <U+1F34A>: TANGERINE [Common]
+'🌸' [f0 9f 8c b8] : Noto Color Emoji
+🌸 <U+1F338>: CHERRY BLOSSOM [Common]
 ```
 
 
