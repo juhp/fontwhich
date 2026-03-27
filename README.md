@@ -20,9 +20,11 @@ it requires the fonts to be available but not a graphical session.
 fontwhich
 
 Usage: fontwhich [--version] [-f|--font FONT] [-b|--utf8] [-u|--unicode] 
-                 (--list-langs | (-l|--lang LANG) [-s|--sample-text] | TEXT)
+                 [-s|--sample-text] 
+                 (--list-langs | (-l|--lang LANG) | --all-langs | TEXT)
 
   Describes the fonts used to render text with pango
+  https://github.com/juhp/fontwhich#readme
 
 Available options:
   -h,--help                Show this help text
@@ -30,9 +32,10 @@ Available options:
   -f,--font FONT           Base font [default: Sans]
   -b,--utf8                Output UTF-8 hex codes
   -u,--unicode             Output Unicode data
+  -s,--sample-text         Use Pango sample text for language
   --list-langs             List language orthography
   -l,--lang LANG           Language code
-  -s,--sample-text         Use Pango sample text for language
+  --all-langs              Output all orth languages
 ```
 
 `$ fontwhich Hello 🌍 World 世界`

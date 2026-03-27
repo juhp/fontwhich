@@ -19,8 +19,8 @@ import qualified Unicode.Char.General.Scripts as US
 import Paths_fontwhich (version)
 
 data Mode = ListLangs
-          | Lang !String !Bool
-          | AllLangs !Bool
+          | Lang !String
+          | AllLangs
           | InputText ![String]
 
 main :: IO ()
@@ -32,19 +32,17 @@ main =
     <$> optional (strOptionWith 'f' "font" "FONT" "Base font [default: Sans]")
     <*> switchWith 'b' "utf8" "Output UTF-8 hex codes"
     <*> switchWith 'u' "unicode" "Output Unicode data"
+    <*> switchWith 's' "sample-text" "Use Pango sample text for language"
     <*> modeOpt
   where
     modeOpt =
       flagLongWith' ListLangs "list-langs" "List language orthography" <|>
-      (Lang
-       <$> strOptionWith 'l' "lang" "LANG" "Language code"
-       <*> switchWith 's' "sample-text" "Use Pango sample text for language")
-      <|>
-      (flagLongWith' AllLangs "all-langs" "Output all orth languages" <*> switchWith 's' "sample-text" "Use Pango sample text for language") <|>
+      Lang <$> strOptionWith 'l' "lang" "LANG" "Language code" <|>
+      flagLongWith' AllLangs "all-langs" "Output all orth languages" <|>
       InputText <$> some (strArg "TEXT")
 
-runMain :: Maybe String -> Bool -> Bool -> Mode -> IO ()
-runMain mfont hex unicode mode = do
+runMain :: Maybe String -> Bool -> Bool -> Bool -> Mode -> IO ()
+runMain mfont hex unicode sample mode = do
   -- Get a default Font Map and Context
   fontMap <- PangoCairo.fontMapGetDefault
   context <- Pango.fontMapCreateContext fontMap
@@ -57,7 +55,7 @@ runMain mfont hex unicode mode = do
         ListLangs -> do
           putStrLn $ unwords orths
         InputText args -> run args Nothing
-        Lang lang sample -> do
+        Lang lang -> do
           (plang,code) <- determineLangCode lang
           t <-
             if sample
@@ -67,10 +65,10 @@ runMain mfont hex unicode mode = do
               -- FIXME with iso-codes json + gettext perhaps
               -- Just LangName -> return ["To be implemented!"]
           run t $ Just (plang,code)
-        AllLangs sample ->
+        AllLangs ->
           forM_ orths $ \orth -> do
           when sample $ putStr $ quoteStr orth ++ ": "
-          runMode fontMap context baseName baseFont $ Lang orth sample
+          runMode fontMap context baseName baseFont $ Lang orth
       where
         run txt mlangcode= do
           if null txt then do
