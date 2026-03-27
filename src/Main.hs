@@ -3,6 +3,7 @@
 import Control.Monad.Extra (filterM, forM_, unless, when, whenJust)
 import qualified Data.ByteString as B
 import Data.Char (ord)
+import qualified Data.List as L
 import Data.Maybe (fromMaybe, isNothing)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
@@ -91,8 +92,15 @@ run mfont mlang hex unicode txt = do
       let itemBytes = B.take (fromIntegral len) $ B.drop (fromIntegral offset) utf8Bytes
       return (T.unpack $ TE.decodeUtf8 itemBytes, item)
 
+surround :: Char -> Char -> String -> String
+surround o c s =
+  o : s ++ L.singleton c
+
 quoteStr :: String -> String
-quoteStr str = '\'' : str ++ "'"
+quoteStr = surround '\'' '\''
+
+parenStr :: String -> String
+parenStr = surround '(' ')'
 
 printItemInfo :: Bool -> Bool -> (String, Pango.Item) -> IO ()
 printItemInfo hex unicode (str,item) = do
@@ -132,7 +140,7 @@ printItemInfo hex unicode (str,item) = do
     let mname = UN.name char
         script = US.script char
         codepoint = printf "U+%04X" (ord char)
-    putStrLn $ " <" ++ codepoint ++ ">:" +-+ fromMaybe "unknown codepoint" mname +-+ '[' : show script ++ "]" -- +-+ '(' : US.scriptShortName script ++ ")"
+    putStrLn $ " <" ++ codepoint ++ ">:" +-+ fromMaybe "unknown codepoint" mname +-+ '[' : show script ++ "]" -- +-+ parenStr (US.scriptShortName script)
   where
     hexify :: Char -> String
     hexify char =
