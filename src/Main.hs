@@ -40,7 +40,6 @@ run mfont mlang hex unicode txt = do
   -- Get a default Font Map and Context
   fontMap <- PangoCairo.fontMapGetDefault
   context <- Pango.fontMapCreateContext fontMap
-  attr <- Pango.attrListNew
   let baseName = fromMaybe "Sans" mfont
   baseFont <- Pango.fontDescriptionFromString $ T.pack baseName
   mplang <- Pango.languageFromString $ T.pack <$> mlang
@@ -73,6 +72,7 @@ run mfont mlang hex unicode txt = do
       when (hex || unicode) $
         putStr $ show (B.length utf8Bytes) +-+ "bytes;"
 
+      attr <- Pango.attrListNew
       -- start_index, length, cached_iter
       items <- Pango.itemize context myText 0 (fromIntegral $ B.length utf8Bytes) attr Nothing
       when (hex || unicode) $
