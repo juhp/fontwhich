@@ -11,7 +11,7 @@ it requires the fonts to be available but not a graphical session.
 `$ fontwhich --version`
 
 ```
-0.2.1
+0.3
 ```
 
 `$ fontwhich --help`
@@ -19,8 +19,8 @@ it requires the fonts to be available but not a graphical session.
 ```
 fontwhich
 
-Usage: fontwhich [--version] [-f|--font FONT] [-l|--lang LANG] [-b|--utf8]
-                 [-u|--unicode] [TEXT]
+Usage: fontwhich [--version] [-f|--font FONT] [-b|--utf8] [-u|--unicode] 
+                 ((-l|--lang LANG) [-s|--sample-text] | TEXT)
 
   Describes the fonts used to render text with pango
 
@@ -28,9 +28,10 @@ Available options:
   -h,--help                Show this help text
   --version                Show version
   -f,--font FONT           Base font [default: Sans]
-  -l,--lang LANG           Language code
   -b,--utf8                Output UTF-8 hex codes
   -u,--unicode             Output Unicode data
+  -l,--lang LANG           Language code
+  -s,--sample-text         Use Pango sample text for language
 ```
 
 `$ fontwhich Hello 🌍 World 世界`
@@ -107,11 +108,11 @@ $ stack install
 There is a copr repo: <https://copr.fedorainfracloud.org/coprs/petersen/fontwhich/>
 
 ## Misc
-Code assisted with Gemini 3.1.
+Initial code assisted with Gemini 3.1.
 
-The tool is related conceptually to <https://github.com/sudipshil9862/whichfont> (C codebase).
+The tool is related conceptually to the C project <https://github.com/sudipshil9862/whichfont>.
 
-"fontwhich" as in "sandwhich" but with fonts.
+"fontwhich" as in "sandwich" but with fonts.
 
 ## Collaborate
 

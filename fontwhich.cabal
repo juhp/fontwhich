@@ -1,6 +1,6 @@
 cabal-version:       2.2
 name:                fontwhich
-version:             0.2.1
+version:             0.3
 synopsis:            Determine fonts used to render text
 description:
         Fontwhich is a commandline tool that used pango to determine which
