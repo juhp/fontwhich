@@ -60,8 +60,17 @@ run mfont mlang hex unicode txt = do
               Pango.fontsetForeach fs $ \_ font -> do
                 desc' <- Pango.fontDescribe font
                 mfamily <- Pango.fontDescriptionGetFamily desc'
-                whenJust mfamily $ \family ->
-                  putStrLn $ "Primary" +-+ baseName +-+ "font" +-+ maybe "" ("for" +-+) mlang +-+ "is:" +-+ show family
+                whenJust mfamily $ \family -> do
+                  mlangs <- Pango.fontGetLanguages font
+                  let missing =
+                        case mlangs of
+                          Nothing -> ""
+                          Just langs ->
+                            if plang `elem` langs
+                            then ""
+                            else parenStr "missing coverage"
+                  -- was: +-+ maybe "" (("for" +-+) . quoteStr)  mlang
+                  putStrLn $ "Primary" +-+ baseName +-+ "font" +-+ "is:" +-+ show family +-+ missing
                 return True -- stop after first font
     else do
       let myText = T.pack $ unwords txt
