@@ -1,4 +1,4 @@
--- SPDX-License-Identifier: BSD-3-Clause
+-- SPDX-License-Identifier: GPL-3.0-or-later
 
 import Control.Monad.Extra (filterM, forM_, unless, when, whenJust)
 import qualified Data.ByteString as B
