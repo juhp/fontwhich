@@ -1,6 +1,6 @@
 -- SPDX-License-Identifier: BSD-3-Clause
 
-import Control.Monad.Extra (filterM, forM_, unless, when, whenJust)
+import Control.Monad.Extra (filterM, forM_, unless, void, when, whenJust)
 import qualified Data.ByteString as B
 import Data.Char (isAsciiLower, ord)
 import Data.List (singleton)
@@ -10,18 +10,19 @@ import qualified Data.Text.Encoding as TE
 import qualified GI.Pango as Pango
 import qualified GI.PangoCairo.Interfaces.FontMap as PangoCairo
 import SimpleCmd (error', (+-+))
-import SimpleCmdArgs (flagWith', optional, simpleCmdArgs, some, strArg,
-                      strOptionWith, switchWith, (<|>))
+import SimpleCmdArgs (flagWith', flagLongWith', optional, simpleCmdArgs, some,
+                      strArg, strOptionWith, switchWith, (<|>))
 import Text.Printf (printf)
 import qualified Unicode.Char.General.Names as UN
 import qualified Unicode.Char.General.Scripts as US
 
 import Paths_fontwhich (version)
+import System.Exit (exitSuccess)
 
 data LangText = SampleText -- | LangName
 
-data TextReq =
-  LangReq !String !(Maybe LangText) | InputText ![String]
+data Mode =
+  ListLangs | LangReq !String !(Maybe LangText) | InputText ![String]
 
 main :: IO ()
 main =
@@ -31,9 +32,10 @@ main =
     <$> optional (strOptionWith 'f' "font" "FONT" "Base font [default: Sans]")
     <*> switchWith 'b' "utf8" "Output UTF-8 hex codes"
     <*> switchWith 'u' "unicode" "Output Unicode data"
-    <*> textReqOpt
+    <*> modeOpt
   where
-    textReqOpt =
+    modeOpt =
+      flagLongWith' ListLangs "list-langs" "List language orthography" <|>
       (LangReq
        <$> strOptionWith 'l' "lang" "LANG" "Language code"
        <*> optional (flagWith' SampleText 's' "sample-text" "Use Pango sample text for language"
@@ -43,7 +45,7 @@ main =
       <|>
       InputText <$> some (strArg "TEXT")
 
-run :: Maybe String -> Bool -> Bool -> TextReq -> IO ()
+run :: Maybe String -> Bool -> Bool -> Mode -> IO ()
 run mfont hex unicode txtreq = do
   -- Get a default Font Map and Context
   fontMap <- PangoCairo.fontMapGetDefault
@@ -52,6 +54,10 @@ run mfont hex unicode txtreq = do
   baseFont <- Pango.fontDescriptionFromString $ T.pack baseName
   (txt,mlangcode) <-
     case txtreq of
+      ListLangs -> do
+        putStrLn $ unwords orths
+        void exitSuccess
+        return ([],Nothing)
       InputText args -> return (args,Nothing)
       LangReq lang mltxt -> do
         (plang,code) <- determineLangCode lang

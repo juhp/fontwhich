@@ -20,7 +20,7 @@ it requires the fonts to be available but not a graphical session.
 fontwhich
 
 Usage: fontwhich [--version] [-f|--font FONT] [-b|--utf8] [-u|--unicode] 
-                 ((-l|--lang LANG) [-s|--sample-text] | TEXT)
+                 (--list-langs | (-l|--lang LANG) [-s|--sample-text] | TEXT)
 
   Describes the fonts used to render text with pango
 
@@ -30,6 +30,7 @@ Available options:
   -f,--font FONT           Base font [default: Sans]
   -b,--utf8                Output UTF-8 hex codes
   -u,--unicode             Output Unicode data
+  --list-langs             List language orthography
   -l,--lang LANG           Language code
   -s,--sample-text         Use Pango sample text for language
 ```
