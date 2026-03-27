@@ -26,7 +26,8 @@ data Mode = ListLangs
 main :: IO ()
 main =
   simpleCmdArgs (Just version) "fontwhich"
-  "Describes the fonts used to render text with pango" $
+  ("Describes the fonts used to render text with pango" +-+
+   "https://github.com/juhp/fontwhich#readme") $
     runMain
     <$> optional (strOptionWith 'f' "font" "FONT" "Base font [default: Sans]")
     <*> switchWith 'b' "utf8" "Output UTF-8 hex codes"
